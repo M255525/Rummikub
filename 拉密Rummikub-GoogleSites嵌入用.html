@@ -1,0 +1,922 @@
+<style>
+:root {
+  --tile-w: 52px; --tile-h: 68px; --fs: 18px;
+  --board-bg: #1e5e1e; --hand-bg: #252525; --header-bg: #2c1a08;
+  --red: #CC2200; --blue: #1155CC; --orange: #CC6600; --black: #1a1a1a;
+  --joker-bg: #222; --joker-fg: #FBC94C;
+  --gold: #FFD700; --green-btn: #2a7a2a; --red-btn: #8b1a1a; --gray-btn: #3a3a3a;
+}
+[data-lf] { --tile-w: 62px; --tile-h: 80px; --fs: 22px; }
+[data-hc] {
+  --board-bg: #003300; --red: #FF3300; --blue: #3366FF;
+  --orange: #FF8800; --black: #000; --gold: #FFFF00;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;}
+body{
+  display:flex;flex-direction:column;
+  background:#111;color:#eee;
+  font-family:"Microsoft JhengHei","PingFang TC","Noto Sans TC",sans-serif;
+  font-size:var(--fs);
+}
+
+/* ── Header ── */
+#hdr{
+  background:var(--header-bg);
+  padding:8px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  border-bottom:3px solid #6B4F35;flex-shrink:0;
+}
+#hdr h1{color:var(--gold);font-size:1.1em;white-space:nowrap;}
+#msg{
+  flex:1;text-align:center;font-size:.95em;color:var(--gold);
+  font-weight:700;min-width:0;word-break:break-all;
+}
+.hbtn{
+  display:flex;align-items:center;gap:5px;
+  padding:8px 13px;border-radius:9px;border:2px solid transparent;
+  cursor:pointer;font:700 .82em/1 inherit;min-height:42px;white-space:nowrap;
+}
+.hbtn:disabled{opacity:.4;cursor:not-allowed;}
+.g{background:#1f5c1f;color:#fff;border-color:#3a8a3a;}
+.r{background:#7a1515;color:#fff;border-color:#bb2222;}
+.n{background:#333;color:#ccc;border-color:#555;}
+.o{background:#7a4a00;color:#fff;border-color:#bb7700;}
+
+/* ── AI row ── */
+#ai-row{
+  background:#1c1c1c;padding:6px 14px;
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  border-bottom:2px solid #333;flex-shrink:0;
+}
+.ap{
+  display:flex;align-items:center;gap:6px;
+  padding:5px 10px;border-radius:7px;
+  background:#2a2a2a;border:2px solid #3a3a3a;
+  font-size:.82em;color:#aaa;
+}
+.ap.cur{border-color:var(--gold);background:#3a3200;color:var(--gold);}
+.apc{
+  width:26px;height:26px;border-radius:50%;
+  background:#444;display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:.85em;
+}
+#deck-info{margin-left:auto;font-size:.82em;color:#888;}
+
+/* ── Board ── */
+#board{
+  flex:1;overflow-y:auto;
+  background:var(--board-bg);
+  padding:10px 12px;
+  position:relative;
+}
+.blabel{color:rgba(255,255,255,.4);font-size:.72em;letter-spacing:.08em;margin-bottom:6px;}
+.set-row{
+  display:flex;flex-wrap:wrap;gap:4px;align-items:center;
+  padding:6px 8px;border-radius:8px;margin-bottom:7px;
+  background:rgba(0,0,0,.25);border:2px solid rgba(255,255,255,.08);
+  min-height:78px;cursor:pointer;transition:border-color .2s;
+  position:relative;
+}
+.set-row:hover{border-color:rgba(255,255,255,.25);}
+.set-row.inv{border-color:#CC2200;background:rgba(180,0,0,.12);}
+.set-row.vld{border-color:#3a8a3a;}
+.set-row.sel-target{border-color:var(--gold);background:rgba(255,215,0,.08);}
+.set-score{color:rgba(255,255,255,.4);font-size:.72em;padding:2px 6px;}
+.add-label{
+  margin-left:auto;font-size:.75em;color:rgba(255,215,0,.6);
+  background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.3);
+  border-radius:6px;padding:4px 8px;pointer-events:none;
+}
+.new-slot{
+  border:2px dashed rgba(255,255,255,.15);border-radius:8px;
+  padding:8px 14px;min-height:60px;margin-bottom:7px;
+  display:flex;align-items:center;justify-content:center;
+  color:rgba(255,255,255,.3);font-size:.82em;cursor:pointer;
+  transition:all .2s;
+}
+.new-slot:hover,.new-slot.sel-target{border-color:var(--gold);color:var(--gold);background:rgba(255,215,0,.06);}
+
+/* ── Tiles ── */
+.tile{
+  width:var(--tile-w);height:var(--tile-h);
+  background:#FFF8E8;border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:900;font-size:1.3em;
+  border:2px solid #C4A35A;
+  cursor:pointer;user-select:none;flex-shrink:0;position:relative;
+  transition:transform .1s,box-shadow .1s;
+  box-shadow:0 3px 6px rgba(0,0,0,.5);
+}
+.tile:hover{transform:translateY(-3px);box-shadow:0 6px 12px rgba(0,0,0,.6);}
+.tile.sel{
+  border-color:var(--gold)!important;
+  box-shadow:0 0 0 3px var(--gold),0 4px 8px rgba(0,0,0,.5);
+  transform:translateY(-5px);
+}
+.tile[data-c=red]{color:var(--red);}
+.tile[data-c=blue]{color:var(--blue);}
+.tile[data-c=orange]{color:var(--orange);}
+.tile[data-c=black]{color:var(--black);}
+.tile[data-c=joker]{background:var(--joker-bg);color:var(--joker-fg);border-color:var(--joker-fg);font-size:1em;}
+.tc{position:absolute;font-size:.38em;font-weight:900;line-height:1;}
+.tc.tl{top:3px;left:4px;}
+.tc.br{bottom:3px;right:4px;transform:rotate(180deg);}
+
+/* ── Action bar ── */
+#actbar{
+  background:#1a1a1a;padding:8px 14px;
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  border-top:2px solid #2d2d2d;flex-shrink:0;
+}
+#turn-info{flex:1;font-size:.8em;color:#999;}
+
+/* ── Hand ── */
+#hand-area{
+  background:var(--hand-bg);padding:8px 14px 10px;
+  border-top:3px solid #444;flex-shrink:0;
+}
+#hlabel{
+  display:flex;align-items:center;gap:8px;margin-bottom:6px;
+  color:#aaa;font-size:.8em;
+}
+.hcnt{background:#333;border-radius:99px;padding:2px 10px;font-weight:700;color:#ddd;}
+#hand{display:flex;flex-wrap:wrap;gap:5px;min-height:72px;align-items:flex-end;}
+
+/* ── Overlays ── */
+#overlay,#tut-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.85);z-index:100;
+  align-items:center;justify-content:center;
+}
+#overlay.on,#tut-overlay.on{display:flex;}
+#tut-overlay{z-index:200;align-items:flex-start;overflow-y:auto;padding:20px;}
+.modal{
+  background:#252525;border-radius:14px;padding:28px;
+  max-width:480px;width:90%;text-align:center;border:2px solid #444;
+}
+.modal h2{color:var(--gold);font-size:1.4em;margin-bottom:12px;}
+.modal p{color:#ccc;font-size:.95em;line-height:1.7;margin-bottom:18px;white-space:pre-line;}
+.mbtns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+#tut{
+  background:#252525;border-radius:14px;padding:28px;
+  max-width:580px;width:100%;border:2px solid #444;margin:auto;
+}
+#tut h2{color:var(--gold);margin-bottom:12px;}
+#tut h3{color:#FBC94C;margin:18px 0 6px;font-size:1em;}
+#tut p{color:#ccc;line-height:1.7;margin-bottom:10px;font-size:.92em;}
+.ex-tiles{display:flex;gap:5px;flex-wrap:wrap;margin:6px 0 10px;}
+
+/* ── Settings ── */
+#settings{
+  display:none;position:fixed;top:55px;right:14px;
+  background:#2a2a2a;border:2px solid #444;border-radius:12px;
+  padding:14px;z-index:50;min-width:190px;
+}
+#settings.on{display:block;}
+.srow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;color:#ccc;font-size:.85em;}
+.tog{
+  background:#333;border:2px solid #555;color:#999;
+  padding:5px 11px;border-radius:7px;cursor:pointer;font:.82em/1 inherit;min-height:32px;
+}
+.tog.on{background:var(--green-btn);border-color:#3a8a3a;color:#fff;}
+.ai-sel{display:flex;gap:6px;}
+.ai-num{
+  width:32px;height:32px;border-radius:7px;border:2px solid #555;
+  background:#333;color:#aaa;cursor:pointer;font:700 .9em/1 inherit;
+  display:flex;align-items:center;justify-content:center;
+}
+.ai-num.on{background:var(--green-btn);border-color:#3a8a3a;color:#fff;}
+
+/* ── Responsive ── */
+@media(max-width:600px){
+  :root{--tile-w:40px;--tile-h:52px;--fs:15px;}
+  .hbtn{padding:7px 10px;}
+  #hdr{padding:6px 10px;gap:7px;}
+  .tile{font-size:1.1em;}
+}
+@media(min-width:981px){
+  :root{--tile-w:56px;--tile-h:74px;}
+}
+</style>
+
+<!-- Game Over Modal -->
+<div id="overlay">
+  <div class="modal">
+    <h2 id="mtitle">遊戲結束</h2>
+    <p id="mbody"></p>
+    <div class="mbtns">
+      <button class="hbtn g" onclick="newGame()">🔄 再玩一局</button>
+      <button class="hbtn n" onclick="closeOverlay()">✕ 關閉</button>
+    </div>
+  </div>
+</div>
+
+<!-- Tutorial -->
+<div id="tut-overlay">
+  <div id="tut">
+    <h2>📖 拉密遊戲教學</h2>
+    <p>拉密（Rummikub）是把手牌組成合法牌型的策略桌遊，最先出完手牌者獲勝。</p>
+
+    <h3>🃏 牌組（共 106 張）</h3>
+    <p>4 種顏色 × 數字 1–13 × 各 2 組 = 104 張，加上 2 張百搭牌（☆）</p>
+
+    <h3>✅ 兩種合法牌型</h3>
+    <p><b>組合 (Group)：</b>3 或 4 張相同數字、不同顏色的牌</p>
+    <div class="ex-tiles">
+      <div class="tile" data-c="red">7<span class="tc tl">7</span><span class="tc br">7</span></div>
+      <div class="tile" data-c="blue">7<span class="tc tl">7</span><span class="tc br">7</span></div>
+      <div class="tile" data-c="orange">7<span class="tc tl">7</span><span class="tc br">7</span></div>
+    </div>
+    <p><b>順子 (Run)：</b>3 張以上同顏色、數字連續的牌</p>
+    <div class="ex-tiles">
+      <div class="tile" data-c="black">9<span class="tc tl">9</span><span class="tc br">9</span></div>
+      <div class="tile" data-c="black">10<span class="tc tl">10</span><span class="tc br">10</span></div>
+      <div class="tile" data-c="black">11<span class="tc tl">11</span><span class="tc br">11</span></div>
+    </div>
+
+    <h3>⭐ 首次出牌規則</h3>
+    <p>第一次出牌，牌的數字總和必須達到 <b>30 分以上</b>。之後可自由出牌、加牌到牌桌。</p>
+
+    <h3>🎮 操作步驟</h3>
+    <p>1. 點選手牌中的牌（出現金色邊框代表已選取）<br>
+       2. 點選牌桌上的組合列（<b>加入此組</b>）或點 <b>新增一組</b><br>
+       3. 也可以直接拖拉手牌到牌桌<br>
+       4. 確認排列合法後點 <b>確認出牌</b>，或點 <b>取消</b> 撤回本回合操作<br>
+       5. 無法出牌時點 <b>摸牌</b> 從牌堆補一張</p>
+
+    <h3>☆ 百搭牌</h3>
+    <p>百搭牌可替代任意一張牌。若您有對應的真牌，可從牌桌換回百搭牌繼續使用。</p>
+
+    <h3>🏆 勝負判定</h3>
+    <p>最先出完所有手牌者獲勝！牌堆摸完仍無人出完時，手牌點數最少者獲勝。</p>
+
+    <div style="text-align:center;margin-top:20px;">
+      <button class="hbtn g" style="font-size:1em;" onclick="closeTut()">✓ 了解了，開始遊戲！</button>
+    </div>
+  </div>
+</div>
+
+<!-- Settings Panel -->
+<div id="settings">
+  <div class="srow">
+    <span>放大字體</span>
+    <button class="tog" id="togLF" onclick="toggleLF()">關</button>
+  </div>
+  <div class="srow">
+    <span>高對比</span>
+    <button class="tog" id="togHC" onclick="toggleHC()">關</button>
+  </div>
+  <div class="srow">
+    <span>電腦玩家數</span>
+    <div class="ai-sel">
+      <button class="ai-num on" id="an1" onclick="setAICount(1)">1</button>
+      <button class="ai-num" id="an2" onclick="setAICount(2)">2</button>
+      <button class="ai-num" id="an3" onclick="setAICount(3)">3</button>
+    </div>
+  </div>
+  <hr style="border-color:#3a3a3a;margin:10px 0;">
+  <button class="hbtn r" style="width:100%;justify-content:center;" onclick="newGame()">🔄 重新開始</button>
+</div>
+
+<!-- Header -->
+<div id="hdr">
+  <h1>🃏 拉密</h1>
+  <div id="msg">載入中…</div>
+  <button class="hbtn n" onclick="document.getElementById('tut-overlay').classList.add('on')">📖 教學</button>
+  <button class="hbtn n" onclick="document.getElementById('settings').classList.toggle('on')">⚙ 設定</button>
+  <button class="hbtn g" onclick="newGame()">🔄 新局</button>
+</div>
+
+<!-- AI status row -->
+<div id="ai-row">
+  <span style="color:#666;font-size:.8em;">電腦：</span>
+</div>
+
+<!-- Board -->
+<div id="board"
+  ondragover="event.preventDefault()"
+  ondrop="onBoardDrop(event)">
+  <div class="blabel">▸ 牌桌（點選手牌後點此出牌，或直接拖拉）</div>
+  <div id="sets"></div>
+  <div class="new-slot" id="nslot"
+    onclick="placeToNew()"
+    ondragover="event.preventDefault();event.stopPropagation();this.classList.add('sel-target')"
+    ondragleave="this.classList.remove('sel-target')"
+    ondrop="this.classList.remove('sel-target');onNewSlotDrop(event)">
+    ＋ 新增一組（點此或將選取的牌拖到這裡）
+  </div>
+</div>
+
+<!-- Action bar -->
+<div id="actbar">
+  <div id="turn-info"></div>
+  <button class="hbtn o" id="bsort" onclick="doSortHand()">排列手牌</button>
+  <button class="hbtn n" id="bundo" onclick="doUndo()" disabled>↩ 取消</button>
+  <button class="hbtn r" id="bdraw" onclick="doDraw()">摸牌 📥</button>
+  <button class="hbtn g" id="bconf" onclick="doConfirm()" disabled>確認出牌 ✓</button>
+</div>
+
+<!-- Player hand -->
+<div id="hand-area">
+  <div id="hlabel">
+    <span>🙋 我的手牌</span>
+    <span class="hcnt" id="hcnt">0 張</span>
+    <span style="color:#666;font-size:.85em;">（點選牌，再點牌桌位置）</span>
+  </div>
+  <div id="hand"></div>
+</div>
+
+<script>
+'use strict';
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+const COLORS = ['red','blue','orange','black'];
+const CNAME  = {red:'紅',blue:'藍',orange:'橘',black:'黑',joker:'百搭'};
+const AINAME = ['電腦甲','電腦乙','電腦丙'];
+
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+let G = null;
+let cfg = { numAI: 1, lf: false, hc: false };
+let tid = 0; // tile id counter
+
+function mkTile(color, number) {
+  return { id: 't'+(++tid), color, number };
+}
+function mkDeck() {
+  tid = 0;
+  const d = [];
+  for (let copy = 0; copy < 2; copy++)
+    for (const c of COLORS)
+      for (let n = 1; n <= 13; n++)
+        d.push(mkTile(c, n));
+  d.push(mkTile('joker', 0));
+  d.push(mkTile('joker', 0));
+  return d;
+}
+function shuffle(a) {
+  for (let i = a.length-1; i > 0; i--) {
+    const j = 0|Math.random()*(i+1);
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+}
+function sortHand(h) {
+  h.sort((a,b)=>{
+    if (a.color==='joker') return 1;
+    if (b.color==='joker') return -1;
+    const ci = COLORS.indexOf(a.color)-COLORS.indexOf(b.color);
+    return ci||a.number-b.number;
+  });
+}
+function cloneBoard(b) { return b.map(s=>({tiles:[...s.tiles]})); }
+function tileScore(t) { return t.color==='joker'?30:t.number; }
+function handScore(h) { return h.reduce((s,t)=>s+tileScore(t),0); }
+
+function initGame() {
+  const deck = mkDeck();
+  shuffle(deck);
+  const total = 1 + cfg.numAI;
+  const hands = Array.from({length:total},()=>[]);
+  for (let r = 0; r < 14; r++)
+    for (let p = 0; p < total; p++)
+      if (deck.length) hands[p].push(deck.pop());
+  sortHand(hands[0]);
+  G = {
+    deck,
+    hand: hands[0],
+    aiHands: hands.slice(1),
+    board: [],
+    // editing state
+    wBoard: null,       // work board (clone of board during turn)
+    wHand: null,        // snapshot of hand at turn start (for undo)
+    wBoardSnap: null,   // snapshot of board at turn start
+    edited: false,      // player moved at least one tile
+    selId: null,
+    selSrc: null,       // 'hand' | 'board'
+    selSetIdx: null,
+    turn: 0,            // 0=player, 1+= AI index+1
+    firstMove: Array(total).fill(true),
+    phase: 'playing',
+    msg: '遊戲開始！輪到您了。',
+    busy: false,
+  };
+}
+
+// ═══════════════════════════════════════════
+// VALIDATION
+// ═══════════════════════════════════════════
+function validSet(tiles) {
+  if (!tiles || tiles.length < 3) return false;
+  const real = tiles.filter(t=>t.color!=='joker');
+  if (!real.length) return false;
+  return validGroup(tiles) || validRun(tiles);
+}
+
+function validGroup(tiles) {
+  if (tiles.length < 3 || tiles.length > 4) return false;
+  const real = tiles.filter(t=>t.color!=='joker');
+  if (!real.length) return false;
+  const n = real[0].number;
+  if (!real.every(t=>t.number===n)) return false;
+  const colors = real.map(t=>t.color);
+  return new Set(colors).size === colors.length;
+}
+
+function validRun(tiles) {
+  if (tiles.length < 3) return false;
+  const real = tiles.filter(t=>t.color!=='joker');
+  if (!real.length) return false;
+  const color = real[0].color;
+  if (!real.every(t=>t.color===color)) return false;
+  const nums = real.map(t=>t.number).sort((a,b)=>a-b);
+  for (let i=1;i<nums.length;i++) if(nums[i]===nums[i-1]) return false;
+  const jokers = tiles.length - real.length;
+  const span = nums[nums.length-1] - nums[0] + 1;
+  return span <= tiles.length && span - real.length <= jokers;
+}
+
+function boardAllValid(board) {
+  return board.every(s=>s.tiles.length===0||validSet(s.tiles));
+}
+
+// ═══════════════════════════════════════════
+// EDITING HELPERS
+// ═══════════════════════════════════════════
+function ensureEditing() {
+  if (G.wBoard !== null) return;
+  G.wBoardSnap = cloneBoard(G.board);
+  G.wHand = [...G.hand];
+  G.wBoard = cloneBoard(G.board);
+  G.edited = false;
+}
+
+function getBoard() { return G.wBoard !== null ? G.wBoard : G.board; }
+
+function findTileInHand(id) { return G.hand.findIndex(t=>t.id===id); }
+function findTileInBoard(id) {
+  for (let si=0;si<getBoard().length;si++) {
+    const ti = getBoard()[si].tiles.findIndex(t=>t.id===id);
+    if (ti>=0) return {si,ti};
+  }
+  return null;
+}
+
+function popSelected() {
+  if (!G.selId) return null;
+  if (G.selSrc==='hand') {
+    const i = findTileInHand(G.selId);
+    if (i<0) return null;
+    return G.hand.splice(i,1)[0];
+  } else {
+    const pos = findTileInBoard(G.selId);
+    if (!pos) return null;
+    return G.wBoard[pos.si].tiles.splice(pos.ti,1)[0];
+  }
+}
+
+function clearSel() { G.selId=G.selSrc=G.selSetIdx=null; }
+
+// ═══════════════════════════════════════════
+// PLAYER ACTIONS
+// ═══════════════════════════════════════════
+function selectTile(id, src, setIdx) {
+  if (G.turn!==0||G.phase!=='playing'||G.busy) return;
+  ensureEditing();
+  if (G.selId===id) { clearSel(); render(); return; }
+  G.selId=id; G.selSrc=src; G.selSetIdx=setIdx;
+  render();
+}
+
+function placeToNew() {
+  if (G.turn!==0||G.phase!=='playing'||G.busy) return;
+  if (!G.selId) { setMsg('請先點選手牌中的牌，再點「新增一組」'); return; }
+  ensureEditing();
+  const tile = popSelected();
+  if (!tile) { clearSel(); render(); return; }
+  G.wBoard.push({tiles:[tile]});
+  G.edited = true;
+  clearSel();
+  render();
+}
+
+function placeToSet(si) {
+  if (G.turn!==0||G.phase!=='playing'||G.busy) return;
+  if (!G.selId) { setMsg('請先點選一張牌，再點要加入的組合列'); return; }
+  ensureEditing();
+  // Prevent moving to same set without net change
+  if (G.selSrc==='board' && G.selSetIdx===si) { clearSel(); render(); return; }
+  const tile = popSelected();
+  if (!tile) { clearSel(); render(); return; }
+  G.wBoard[si].tiles.push(tile);
+  G.edited = true;
+  clearSel();
+  render();
+}
+
+function doConfirm() {
+  if (G.turn!==0||G.phase!=='playing'||G.wBoard===null) return;
+  // Remove empty sets
+  G.wBoard = G.wBoard.filter(s=>s.tiles.length>0);
+
+  if (!boardAllValid(G.wBoard)) {
+    setMsg('❌ 牌桌上有不合法的組合，請重新排列！紅色邊框為問題所在。');
+    render(); return;
+  }
+
+  // Check first move ≥ 30
+  if (G.firstMove[0]) {
+    const origIds = new Set(G.wBoardSnap.flatMap(s=>s.tiles.map(t=>t.id)));
+    const newTiles = G.wBoard.flatMap(s=>s.tiles).filter(t=>!origIds.has(t.id));
+    if (!newTiles.length) { setMsg('❌ 您還沒有出任何牌！'); return; }
+    const sc = newTiles.reduce((s,t)=>s+tileScore(t),0);
+    if (sc < 30) { setMsg(`❌ 首次出牌需 30 分以上，目前新出的牌共 ${sc} 分，請再多出一些！`); return; }
+    G.firstMove[0] = false;
+  } else {
+    const origIds = new Set(G.wBoardSnap.flatMap(s=>s.tiles.map(t=>t.id)));
+    const newTiles = G.wBoard.flatMap(s=>s.tiles).filter(t=>!origIds.has(t.id));
+    if (!newTiles.length) { setMsg('❌ 您還沒有出任何牌！'); return; }
+  }
+
+  G.board = G.wBoard;
+  G.wBoard = G.wBoardSnap = G.wHand = null;
+  G.edited = false;
+  clearSel();
+
+  if (!G.hand.length) {
+    G.phase = 'gameover';
+    render();
+    showOverlay('🎉 恭喜您獲勝！','您已將所有手牌出完，勝利！');
+    return;
+  }
+  setMsg('出牌成功！輪到電腦了…');
+  render();
+  nextTurn();
+}
+
+function doDraw() {
+  if (G.turn!==0||G.phase!=='playing'||G.busy) return;
+  if (G.wBoard!==null) doUndo(); // cancel edits first
+  if (!G.deck.length) { setMsg('牌堆已空，跳過本回合'); nextTurn(); return; }
+  const t = G.deck.pop();
+  G.hand.push(t);
+  sortHand(G.hand);
+  setMsg(`您摸了一張牌：${CNAME[t.color]}${t.color!=='joker'?t.number:''}`);
+  render();
+  setTimeout(nextTurn, 400);
+}
+
+function doUndo() {
+  if (!G.wBoardSnap) return;
+  G.hand = [...G.wHand];
+  G.wBoard = G.wBoardSnap = G.wHand = null;
+  G.edited = false;
+  clearSel();
+  setMsg('已取消本回合的出牌，恢復原狀。');
+  render();
+}
+
+function doSortHand() { sortHand(G.hand); render(); }
+
+// ═══════════════════════════════════════════
+// TURN MANAGEMENT
+// ═══════════════════════════════════════════
+function nextTurn() {
+  G.turn = (G.turn+1) % (1+cfg.numAI);
+  clearSel();
+  if (G.turn===0) {
+    setMsg('輪到您了！請選取手牌出牌，或摸牌。');
+    render();
+  } else {
+    const ai = G.turn-1;
+    setMsg(`${AINAME[ai]} 正在思考…`);
+    G.busy = true;
+    render();
+    setTimeout(()=>doAI(ai), 900+Math.random()*700);
+  }
+}
+
+// ═══════════════════════════════════════════
+// AI
+// ═══════════════════════════════════════════
+function doAI(ai) {
+  const hand = G.aiHands[ai];
+  const isFirst = G.firstMove[ai+1];
+  const res = aiPlay(hand, G.board, isFirst);
+
+  if (res) {
+    G.board = res.board;
+    G.aiHands[ai] = res.hand;
+    if (isFirst) G.firstMove[ai+1] = false;
+    setMsg(`${AINAME[ai]} 出了 ${res.count} 張牌！`);
+    if (!G.aiHands[ai].length) {
+      G.phase = 'gameover';
+      G.busy = false;
+      render();
+      showOverlay(`💻 ${AINAME[ai]} 獲勝！`,`${AINAME[ai]} 已出完所有手牌。\n您的手牌剩 ${G.hand.length} 張（${handScore(G.hand)} 分）`);
+      return;
+    }
+  } else {
+    if (G.deck.length) {
+      hand.push(G.deck.pop());
+      setMsg(`${AINAME[ai]} 摸了一張牌`);
+    } else {
+      setMsg(`${AINAME[ai]} 跳過（牌堆已空）`);
+    }
+  }
+
+  G.busy = false;
+
+  // Check draw condition: all decks empty, player's turn, no moves possible
+  if (!G.deck.length && G.board.length) {
+    const allEmpty = G.aiHands.every(h=>!h.length) && !G.hand.length;
+    if (allEmpty) {
+      G.phase = 'gameover';
+      render();
+      showOverlay('遊戲結束！','所有玩家已出完手牌。');
+      return;
+    }
+  }
+  render();
+  setTimeout(()=>nextTurn(), 500);
+}
+
+function aiPlay(hand, board, isFirst) {
+  const sets = findSets(hand);
+  if (isFirst) {
+    const combo = bestFirstCombo(sets, 30);
+    if (!combo) return null;
+    const ids = new Set(combo.flatMap(s=>s.map(t=>t.id)));
+    return {
+      board:[...board,...combo.map(s=>({tiles:s}))],
+      hand: hand.filter(t=>!ids.has(t.id)),
+      count: ids.size
+    };
+  }
+
+  // Not first move: try to play sets
+  if (!sets.length) {
+    // Try adding to existing sets
+    return tryExtend(hand, board);
+  }
+
+  // Play highest-value set, then try to extend
+  const best = sets.reduce((a,b)=>scoreArr(b)>scoreArr(a)?b:a);
+  const ids = new Set(best.map(t=>t.id));
+  let newBoard = [...board,{tiles:best}];
+  let newHand = hand.filter(t=>!ids.has(t.id));
+  let count = best.length;
+
+  const ext = tryExtend(newHand, newBoard);
+  if (ext) return { board:ext.board, hand:ext.hand, count:count+ext.count };
+  return { board:newBoard, hand:newHand, count };
+}
+
+function scoreArr(tiles) { return tiles.reduce((s,t)=>s+tileScore(t),0); }
+
+function tryExtend(hand, board) {
+  let h = [...hand], b = cloneBoard(board), placed = 0;
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (let si=0;si<b.length;si++) {
+      for (let hi=0;hi<h.length;hi++) {
+        const t = h[hi];
+        if (validSet([...b[si].tiles,t])) { b[si].tiles.push(t); h.splice(hi,1); placed++; changed=true; break; }
+        if (validSet([t,...b[si].tiles])) { b[si].tiles.unshift(t); h.splice(hi,1); placed++; changed=true; break; }
+      }
+      if (changed) break;
+    }
+  }
+  return placed>0 ? {board:b,hand:h,count:placed} : null;
+}
+
+function findSets(hand) {
+  const out = [];
+  // Groups
+  const byNum = {};
+  hand.forEach(t=>{ if(t.color!=='joker'){(byNum[t.number]=byNum[t.number]||[]).push(t);} });
+  for (const n in byNum) {
+    const g = byNum[n]; if (g.length < 3) continue;
+    const seen=new Set(), chosen=[];
+    for (const t of g) { if(!seen.has(t.color)){seen.add(t.color);chosen.push(t);} if(chosen.length===3)break; }
+    if (validGroup(chosen)) out.push(chosen);
+  }
+  // Runs
+  const byCol = {};
+  hand.forEach(t=>{ if(t.color!=='joker'){(byCol[t.color]=byCol[t.color]||[]).push(t);} });
+  for (const c in byCol) {
+    const sorted = byCol[c].sort((a,b)=>a.number-b.number);
+    let i=0;
+    while (i<sorted.length) {
+      let j=i+1;
+      while(j<sorted.length && sorted[j].number===sorted[j-1].number+1) j++;
+      const seq=sorted.slice(i,j);
+      if(seq.length>=3) out.push(seq);
+      i=j;
+    }
+  }
+  return out;
+}
+
+function bestFirstCombo(sets, min) {
+  // Bitmask search (up to 16 sets)
+  const n = Math.min(sets.length, 14);
+  for (let mask=(1<<n)-1; mask>0; mask--) {
+    const chosen=[], used=new Set(); let score=0, ok=true;
+    for (let i=0;i<n;i++) {
+      if(!(mask&(1<<i))) continue;
+      for(const t of sets[i]){ if(used.has(t.id)){ok=false;break;} }
+      if(!ok) break;
+      sets[i].forEach(t=>used.add(t.id));
+      chosen.push(sets[i]); score+=scoreArr(sets[i]);
+    }
+    if(ok && score>=min) return chosen;
+  }
+  return null;
+}
+
+// ═══════════════════════════════════════════
+// DRAG AND DROP
+// ═══════════════════════════════════════════
+let drag = null; // {id, src, setIdx}
+
+function onDragStart(e, id, src, setIdx) {
+  drag = {id, src, setIdx};
+  e.dataTransfer.effectAllowed='move';
+  e.dataTransfer.setData('text/plain', id);
+  if (G.wBoard===null) ensureEditing();
+  G.selId=id; G.selSrc=src; G.selSetIdx=setIdx;
+  setTimeout(render, 10);
+}
+function onBoardDrop(e) {
+  e.preventDefault();
+  if (!drag) return;
+  G.selId=drag.id; G.selSrc=drag.src; G.selSetIdx=drag.setIdx;
+  placeToNew();
+  drag=null;
+}
+function onNewSlotDrop(e) {
+  e.preventDefault();
+  if (!drag) return;
+  G.selId=drag.id; G.selSrc=drag.src; G.selSetIdx=drag.setIdx;
+  placeToNew();
+  drag=null;
+}
+function onSetDrop(e, si) {
+  e.preventDefault(); e.stopPropagation();
+  if (!drag) return;
+  G.selId=drag.id; G.selSrc=drag.src; G.selSetIdx=drag.setIdx;
+  placeToSet(si);
+  drag=null;
+}
+
+// ═══════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════
+function setMsg(m) { G.msg=m; document.getElementById('msg').textContent=m; }
+
+function render() {
+  if (!G) return;
+  document.getElementById('msg').textContent = G.msg;
+  renderAI();
+  renderBoard();
+  renderHand();
+  renderActBar();
+}
+
+function renderAI() {
+  let h = '<span style="color:#666;font-size:.8em;">電腦：</span>';
+  for (let i=0;i<cfg.numAI;i++) {
+    const cur = G.turn===i+1;
+    h += `<div class="ap${cur?' cur':''}">
+      ${AINAME[i]}
+      <div class="apc">${G.aiHands[i].length}</div>
+      <span>${G.aiHands[i].length}張</span>
+      ${cur?'🤔':''}
+    </div>`;
+  }
+  h += `<div id="deck-info">🃏 牌堆 ${G.deck.length} 張</div>`;
+  document.getElementById('ai-row').innerHTML = h;
+}
+
+function renderBoard() {
+  const board = getBoard();
+  const editing = G.wBoard!==null;
+  let h = '';
+  board.forEach((s,si)=>{
+    const isEmpty = !s.tiles.length;
+    let cls = 'set-row';
+    if (editing && !isEmpty) cls += validSet(s.tiles)?' vld':' inv';
+    if (G.turn===0 && !G.busy) cls += ' sel-target'; // clickable hint during turn
+    const sc = s.tiles.reduce((a,t)=>a+tileScore(t),0);
+    h += `<div class="${cls}"
+      data-si="${si}"
+      onclick="placeToSet(${si})"
+      ondragover="event.preventDefault();event.stopPropagation()"
+      ondrop="onSetDrop(event,${si})">
+      ${s.tiles.map((t,ti)=>mkTileHTML(t,'board',si)).join('')}
+      ${isEmpty?'':`<span class="set-score">${sc}分</span>`}
+      ${editing&&G.turn===0?`<span class="add-label">＋ 加入此組</span>`:''}
+    </div>`;
+  });
+  document.getElementById('sets').innerHTML = h;
+
+  const ns = document.getElementById('nslot');
+  ns.classList.toggle('sel-target', editing && G.selId!==null);
+}
+
+function mkTileHTML(t, src, si) {
+  const sel = G.selId===t.id ? ' sel' : '';
+  const label = t.color==='joker'?'☆':t.number;
+  const isPlayer = G.turn===0 && !G.busy;
+  const drag = isPlayer ? `draggable="true" ondragstart="onDragStart(event,'${t.id}','${src}',${si})"` : '';
+  const click = src==='hand'
+    ? `onclick="selectTile('${t.id}','hand',-1)"`
+    : `onclick="selectTile('${t.id}','board',${si});event.stopPropagation()"`;
+  return `<div class="tile${sel}" data-c="${t.color}" ${click} ${drag} title="${CNAME[t.color]}${t.color!=='joker'?t.number:''}">
+    ${t.color!=='joker'?`<span class="tc tl">${label}</span>`:''}
+    ${label}
+    ${t.color!=='joker'?`<span class="tc br">${label}</span>`:''}
+  </div>`;
+}
+
+function renderHand() {
+  document.getElementById('hcnt').textContent = G.hand.length + ' 張';
+  document.getElementById('hand').innerHTML = G.hand.map(t=>mkTileHTML(t,'hand',-1)).join('');
+}
+
+function renderActBar() {
+  const myTurn = G.turn===0 && G.phase==='playing' && !G.busy;
+  const hasEdit = G.wBoard!==null && G.edited;
+  document.getElementById('bconf').disabled = !myTurn || !hasEdit;
+  document.getElementById('bdraw').disabled = !myTurn || G.wBoard!==null;
+  document.getElementById('bundo').disabled = G.wBoard===null;
+
+  let info = '';
+  if (G.phase==='gameover') info='遊戲結束';
+  else if (G.turn===0) {
+    if (G.firstMove[0]) info=`首次出牌需達 30 分（您手牌共 ${handScore(G.hand)} 分）`;
+    else info='選牌放到牌桌，或點「摸牌」結束回合';
+  } else info = `${AINAME[G.turn-1]} 的回合…`;
+  document.getElementById('turn-info').textContent = info;
+}
+
+// ═══════════════════════════════════════════
+// OVERLAYS
+// ═══════════════════════════════════════════
+function showOverlay(title, body) {
+  document.getElementById('mtitle').textContent = title;
+  document.getElementById('mbody').textContent = body;
+  document.getElementById('overlay').classList.add('on');
+}
+function closeOverlay() { document.getElementById('overlay').classList.remove('on'); }
+function closeTut() { document.getElementById('tut-overlay').classList.remove('on'); }
+
+// ═══════════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════════
+function toggleLF() {
+  cfg.lf = !cfg.lf;
+  document.documentElement.toggleAttribute('data-lf', cfg.lf);
+  const b = document.getElementById('togLF');
+  b.textContent = cfg.lf?'開':'關'; b.classList.toggle('on', cfg.lf);
+}
+function toggleHC() {
+  cfg.hc = !cfg.hc;
+  document.documentElement.toggleAttribute('data-hc', cfg.hc);
+  const b = document.getElementById('togHC');
+  b.textContent = cfg.hc?'開':'關'; b.classList.toggle('on', cfg.hc);
+}
+function setAICount(n) {
+  cfg.numAI = n;
+  [1,2,3].forEach(i=>{
+    document.getElementById('an'+i).classList.toggle('on', i===n);
+  });
+}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+function newGame() {
+  closeOverlay();
+  document.getElementById('settings').classList.remove('on');
+  initGame();
+  setMsg('遊戲開始！輪到您了。請點選手牌出牌，或摸牌。');
+  render();
+}
+
+window.addEventListener('DOMContentLoaded', ()=>{
+  newGame();
+  document.getElementById('tut-overlay').classList.add('on');
+});
+
+// Close settings when clicking outside
+document.addEventListener('click', e=>{
+  const s = document.getElementById('settings');
+  if (s.classList.contains('on') && !s.contains(e.target) && !e.target.closest('#hdr')) {
+    s.classList.remove('on');
+  }
+});
+</script>

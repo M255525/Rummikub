@@ -9,10 +9,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **`拉密Rummikub.html`** — 遊戲本體。**所有 HTML／CSS／JavaScript 與遊戲邏輯都在這一個檔案內**，沒有建置步驟、沒有套件、沒有測試。直接以瀏覽器開啟即可執行；修改後重新整理瀏覽器即生效。
 - **`拉密Rummikub-GoogleSites嵌入用.html`** — 供 Google Sites 內嵌的變體版本。
 - **`一鍵複製-貼到GoogleSites.bat`** — 把嵌入版 HTML 內容複製到剪貼簿，方便貼進 Google Sites。
+- **`index.html`** — GitHub Pages 用的重新導向 stub（`meta refresh` 導到 `拉密Rummikub.html`），不是遊戲本體，內容不需要跟著遊戲邏輯同步更新。
 
 **兩個 HTML 版本需保持同步**：修改遊戲邏輯或介面時，主檔與 Google Sites 嵌入版都要一起更新（或由主檔重新產生嵌入版），否則兩處行為會分歧。
 
-**GitHub**：2026-08-05 建立公開 repo <https://github.com/M255525/Rummikub>（分支 `master`）。**沒有接 GitHub Pages**，純粹是程式碼託管；正式上線仍是靠雙擊 `一鍵複製-貼到GoogleSites.bat` 手動貼進 Google 協作平台，GitHub 上的更新不會自動反映到 Google Sites 上線版本，改完程式碼記得兩邊都要處理（`git push` ＋ 手動重新貼上發布）。
+**GitHub Pages 上線網址**：<https://m255525.github.io/Rummikub/>（2026-08-05 啟用，`master` 分支根目錄）。公開 repo：<https://github.com/M255525/Rummikub>。因為遊戲本體檔名是中文（`拉密Rummikub.html`），GitHub Pages 預設只認 `index.html` 當首頁，所以另外放了一個極簡的 `index.html` 導向頁，避免把遊戲內容複製成兩份要同步。**這個上線管道跟 Google Sites 是分開的兩條路**：`git push` 到這個 repo 後 GitHub Pages 會自動重新部署（通常一兩分鐘內生效）；Google Sites 版本仍然要手動雙擊 `一鍵複製-貼到GoogleSites.bat` 重新貼上發布，兩邊不會互相同步，改完程式碼要記得兩邊都處理。
 
 ## 內建的遊戲規則（改動需一致）
 

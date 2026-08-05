@@ -19,3 +19,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 中高齡友善設計（編輯 UI 時務必維持）
 
 這些不是可有可無的樣式，而是本專案的核心約束：文字最小 18px（放大模式 22px）、按鈕點擊區 ≥44×44px、每個操作都有中文文字說明而非純圖示、不設讀秒倒數、無效出牌即時以紅框＋文字提示原因、可一鍵取消整回合操作。另有高對比模式與 RWD 斷點（手機 <600px／平板 600–980px／桌機 >980px），同時支援滑鼠拖拉與觸控點選。變更版面時請沿用上述規格。
+
+## 頂部跑馬燈與「關於」資訊（2026-08-05 新增）
+
+`#marqueeBar` 顯示跟工作區其他工具（`expense-tracker-pwa`、`ai-video-studio` 主版等）共用同一份 Google Sheet 維護的公告內容，同一個授權伺服器 Apps Script 網址。這個遊戲**沒有序號登入機制**，做法是頁面載入時直接 POST 空序號給該網址，只取回傳的 `marquee` 欄位（忽略 `valid`/`reason`）。`localStorage` key 為 `rmkMarquee`，先讀快取立即顯示、再背景 fetch，每 20 分鐘重抓一次；抓取失敗靜默忽略，**不影響「無需網路即可開玩」的核心賣點**（README 明確標榜的特性）。
+
+**版面整合方式**：`html,body{height:100%;overflow:hidden}` ＋ `body{display:flex;flex-direction:column}`——這個殼層自己管理整個視窗高度，所以 `#marqueeBar` 是插進 `<body>` 最上面的一個普通 flex item（`flex-shrink:0`），不是 `position:fixed`。`#overlay`／`#tut-overlay`／`#settings` 都是 `position:fixed`，不受 flex 排列順序影響，DOM 位置可以不用調整。
+
+使用警語（僅供個人娛樂與教學示範使用）＋「創作者：蔡豐全（Mark Tsai）」放在「⚙ 設定」面板最下面（`#settings` 內），不做成常駐頁尾——遊戲畫面寸土寸金，這裡沒有另外的「設定頁」可去，直接用既有的設定面板當作「關於」資訊的落點。
+
+**`拉密Rummikub-GoogleSites嵌入用.html` 已同步套用**（兩個檔案本來就要求保持同步，見上方「架構」一節）。這個嵌入版本除了少了 `<!DOCTYPE>`／`<html>`／`<head>`／`<body>` 這幾行包裝標籤之外，內容與主檔逐行相同；之後任何改動都可以用這個做法重新產生嵌入版，不需要手動逐一對照：
+
+```python
+import io
+with io.open('拉密Rummikub.html', encoding='utf-8', newline='') as f:
+    lines = f.readlines()
+# 移除 DOCTYPE/html/head/title 開頭六行、</head>+<body> 兩行、</body>+</html> 結尾兩行
+# （實際行號請對照當下檔案的 </head>/<body>/</body>/</html> 位置）
+```
+
+**踩坑**：用 Python 重新產生嵌入版檔案時，`io.open(..., 'w', encoding='utf-8')` 若不指定 `newline=''`，Windows 上會把原本的 LF 換行自動轉成 CRLF，導致 `git diff` 整個檔案看起來每一行都變了（明明內容沒變）。務必加 `newline=''` 保持原始換行符不被轉換。

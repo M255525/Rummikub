@@ -206,6 +206,11 @@ body{
   .hbtn{padding:7px 10px;}
   #hdr{padding:6px 10px;gap:7px;}
   .tile{font-size:1.1em;}
+  /* 手機版面：狀態文字太長，跟標題／按鈕擠在同一行會把整排文字擠成一直行窄欄。
+     讓狀態文字自己獨占一整行（放在按鈕下面），標題／按鈕維持同一行不換行。 */
+  #msg{order:5;flex-basis:100%;font-size:.85em;text-align:center;margin-top:2px;}
+  #turn-info{flex-basis:100%;text-align:center;margin-bottom:4px;}
+  #actbar{justify-content:center;}
 }
 @media(min-width:981px){
   :root{--tile-w:56px;--tile-h:74px;}

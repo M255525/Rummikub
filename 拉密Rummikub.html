@@ -176,6 +176,24 @@ body{
 .modal h2{color:var(--gold);font-size:1.4em;margin-bottom:12px;}
 .modal p{color:#ccc;font-size:.95em;line-height:1.7;margin-bottom:18px;white-space:pre-line;}
 .mbtns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+
+/* ── 排行榜（結算 Modal 內）── */
+#score-entry{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:16px;}
+#score-entry.hidden{display:none;}
+#player-name-input{
+  font-family:inherit;font-size:.9em;color:#eee;width:min(180px,60vw);
+  background:#1a1a1a;border:2px solid #555;border-radius:8px;padding:8px 12px;
+}
+#player-name-input::placeholder{color:#777;}
+#leaderboard{margin-bottom:18px;text-align:left;}
+#leaderboard .lb-title{color:var(--gold);font-size:.85em;font-weight:700;text-align:center;margin-bottom:8px;}
+#lb-list{list-style:none;font-size:.88em;}
+#lb-list li{display:flex;align-items:center;gap:8px;padding:5px 10px;border-radius:8px;}
+#lb-list li:nth-child(odd){background:rgba(255,255,255,.05);}
+#lb-list .lb-rank{width:20px;font-weight:900;color:var(--gold);flex-shrink:0;}
+#lb-list .lb-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;color:#eee;}
+#lb-list .lb-turns{color:#aaa;flex-shrink:0;}
+#lb-list .lb-empty{opacity:.6;text-align:center;justify-content:center;padding:8px;}
 #tut{
   background:#252525;border-radius:14px;padding:28px;
   max-width:580px;width:100%;border:2px solid #444;margin:auto;
@@ -233,6 +251,17 @@ body{
   <div class="modal">
     <h2 id="mtitle">遊戲結束</h2>
     <p id="mbody"></p>
+
+    <div id="score-entry" class="hidden">
+      <input id="player-name-input" type="text" maxlength="10" placeholder="輸入暱稱（留白＝訪客）">
+      <button class="hbtn g" onclick="saveScore()">🏆 記錄成績</button>
+    </div>
+
+    <div id="leaderboard">
+      <div class="lb-title">🏆 最快獲勝排行榜 TOP 5（依出牌回合數排名，越少越快）</div>
+      <ol id="lb-list"></ol>
+    </div>
+
     <div class="mbtns">
       <button class="hbtn g" onclick="newGame()">🔄 再玩一局</button>
       <button class="hbtn n" onclick="closeOverlay()">✕ 關閉</button>
@@ -435,6 +464,7 @@ function initGame() {
     phase: 'playing',
     msg: '遊戲開始！輪到您了。',
     busy: false,
+    playerTurns: 0,      // 玩家出牌/摸牌的回合數，用來排行榜計最快獲勝
   };
 }
 
@@ -577,11 +607,12 @@ function doConfirm() {
   G.wBoard = G.wBoardSnap = G.wHand = null;
   G.edited = false;
   clearSel();
+  G.playerTurns++;
 
   if (!G.hand.length) {
     G.phase = 'gameover';
     render();
-    showOverlay('🎉 恭喜您獲勝！','您已將所有手牌出完，勝利！');
+    showOverlay('🎉 恭喜您獲勝！',`您已將所有手牌出完，勝利！\n共花了 ${G.playerTurns} 個回合。`, true);
     return;
   }
   setMsg('出牌成功！輪到電腦了…');
@@ -592,6 +623,7 @@ function doConfirm() {
 function doDraw() {
   if (G.turn!==0||G.phase!=='playing'||G.busy) return;
   if (G.wBoard!==null) doUndo(); // cancel edits first
+  G.playerTurns++;
   if (!G.deck.length) { setMsg('牌堆已空，跳過本回合'); nextTurn(); return; }
   const t = G.deck.pop();
   G.hand.push(t);
@@ -900,9 +932,58 @@ function renderActBar() {
 // ═══════════════════════════════════════════
 // OVERLAYS
 // ═══════════════════════════════════════════
-function showOverlay(title, body) {
+// ═══════════════════════════════════════════
+// 排行榜（本機 localStorage，前 5 名，依出牌回合數由少到多排名）
+// ═══════════════════════════════════════════
+const LB_KEY = 'rmk-leaderboard';
+function loadLB() {
+  try { return JSON.parse(localStorage.getItem(LB_KEY) || '[]'); } catch (e) { return []; }
+}
+function saveLB(list) {
+  try { localStorage.setItem(LB_KEY, JSON.stringify(list)); } catch (e) {}
+}
+function lbQualifies(turns, list) {
+  return list.length < 5 || turns < list[list.length - 1].turns;
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+function renderLB(list) {
+  const ol = document.getElementById('lb-list');
+  if (!list.length) { ol.innerHTML = '<li class="lb-empty">還沒有紀錄，快來搶第一名！</li>'; return; }
+  ol.innerHTML = list.map((e,i)=>`
+    <li>
+      <span class="lb-rank">${i+1}</span>
+      <span class="lb-name">${escapeHtml(e.name)}</span>
+      <span class="lb-turns">${e.turns} 回合</span>
+    </li>
+  `).join('');
+}
+function saveScore() {
+  const name = document.getElementById('player-name-input').value.trim().slice(0,10) || '訪客';
+  const list = loadLB();
+  list.push({ name, turns: G.playerTurns, date: new Date().toLocaleDateString('zh-TW') });
+  list.sort((a,b)=>a.turns-b.turns);
+  list.length = Math.min(list.length, 5);
+  saveLB(list);
+  renderLB(list);
+  document.getElementById('score-entry').classList.add('hidden');
+}
+
+function showOverlay(title, body, isWin) {
   document.getElementById('mtitle').textContent = title;
   document.getElementById('mbody').textContent = body;
+
+  const list = loadLB();
+  const entry = document.getElementById('score-entry');
+  if (isWin && lbQualifies(G.playerTurns, list)) {
+    document.getElementById('player-name-input').value = '';
+    entry.classList.remove('hidden');
+  } else {
+    entry.classList.add('hidden');
+  }
+  renderLB(list);
+
   document.getElementById('overlay').classList.add('on');
 }
 function closeOverlay() { document.getElementById('overlay').classList.remove('on'); }

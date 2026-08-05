@@ -48,3 +48,11 @@ with io.open('拉密Rummikub.html', encoding='utf-8', newline='') as f:
 ```
 
 **踩坑**：用 Python 重新產生嵌入版檔案時，`io.open(..., 'w', encoding='utf-8')` 若不指定 `newline=''`，Windows 上會把原本的 LF 換行自動轉成 CRLF，導致 `git diff` 整個檔案看起來每一行都變了（明明內容沒變）。務必加 `newline=''` 保持原始換行符不被轉換。
+
+## 排行榜（2026-08-05 新增）
+
+`localStorage` key `rmk-leaderboard`，本機前 5 名。**這個遊戲沒有像切水果那樣的「分數」**（是跟電腦對戰的桌遊，不是計分制），所以排名依據改用「玩家出牌回合數」（`G.playerTurns`，`doConfirm()` 成功出牌與 `doDraw()` 摸牌時各自累加一次），數字越小（越快出完手牌）排名越前面。
+
+**只有玩家獲勝才會計入排行榜**——電腦獲勝或牌堆摸完平局時，`showOverlay()` 第三個參數 `isWin` 是 `falsy`，不會顯示暱稱輸入框，但排行榜列表仍然照樣顯示（單純不能新增）。玩家獲勝時才判斷 `G.playerTurns` 是否擠得進前 5（`lbQualifies()`：不到 5 筆或回合數少於目前第 5 名），擠得進才顯示暱稱輸入框（留白預設「訪客」），按「🏆 記錄成績」才寫入並依回合數重新排序（由小到大）、截斷到 5 筆。UI 直接整合進既有的結算 `#overlay` Modal 內（`<p id="mbody">` 跟按鈕列之間），不是另開一個畫面。
+
+**`拉密Rummikub-GoogleSites嵌入用.html` 已同步套用**（跟手機版面修正那次一樣，用同一套 Python 腳本重新產生，記得換算當時檔案的 `</head>`/`<body>`/`</body>`/`</html>` 行號）。

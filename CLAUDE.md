@@ -12,6 +12,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **兩個 HTML 版本需保持同步**：修改遊戲邏輯或介面時，主檔與 Google Sites 嵌入版都要一起更新（或由主檔重新產生嵌入版），否則兩處行為會分歧。
 
+**GitHub**：2026-08-05 建立公開 repo <https://github.com/M255525/Rummikub>（分支 `master`）。**沒有接 GitHub Pages**，純粹是程式碼託管；正式上線仍是靠雙擊 `一鍵複製-貼到GoogleSites.bat` 手動貼進 Google 協作平台，GitHub 上的更新不會自動反映到 Google Sites 上線版本，改完程式碼記得兩邊都要處理（`git push` ＋ 手動重新貼上發布）。
+
 ## 內建的遊戲規則（改動需一致）
 
 牌組 106 張（紅／藍／橘／黑 四色 ×1–13 各兩組 = 104，＋百搭牌 2 張）；合法牌型為 Group（3–4 張同數字不同色）與 Run（3 張以上同色連號）；首次出牌新放牌總分需 ≥30；電腦對手 1–3 位。AI 為基礎策略——不會重排牌桌、手中百搭牌不會主動使用。

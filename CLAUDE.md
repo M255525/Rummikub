@@ -15,6 +15,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **GitHub Pages 上線網址**：<https://m255525.github.io/Rummikub/>（2026-08-05 啟用，`master` 分支根目錄）。公開 repo：<https://github.com/M255525/Rummikub>。因為遊戲本體檔名是中文（`拉密Rummikub.html`），GitHub Pages 預設只認 `index.html` 當首頁，所以另外放了一個極簡的 `index.html` 導向頁，避免把遊戲內容複製成兩份要同步。**這個上線管道跟 Google Sites 是分開的兩條路**：`git push` 到這個 repo 後 GitHub Pages 會自動重新部署（通常一兩分鐘內生效）；Google Sites 版本仍然要手動雙擊 `一鍵複製-貼到GoogleSites.bat` 重新貼上發布，兩邊不會互相同步，改完程式碼要記得兩邊都處理。
 
+## 加入主畫面（PWA，2026-08-14 新增）
+
+比照工作區 `expense-tracker-pwa` 的做法：`manifest.json`＋`icons/`（棋盤綠 `#1e5e1e` 背景、金色 `#FFD700`「拉」字圖示）＋`service-worker.js`（network-first＋同源快取備援，不需要每次改動升版 `CACHE_NAME`）。**manifest／SW 只掛在遊戲本體 `拉密Rummikub.html`，不動 `index.html`（純轉址 stub，不需要）與 `拉密Rummikub-GoogleSites嵌入用.html`（貼進 Google Sites 的內嵌內容，不是獨立頁面載入，無法安裝也不該註冊 SW）**。安裝按鈕（`#installBtn`，📲 加入主畫面）放在 `#settings` 面板內、「🔄 重新開始」下方，沿用既有 `.hbtn` 樣式。已用 Playwright 實測 Chromium 觸發 `beforeinstallprompt`、SW 註冊成功。
+
 ## 內建的遊戲規則（改動需一致）
 
 牌組 106 張（紅／藍／橘／黑 四色 ×1–13 各兩組 = 104，＋百搭牌 2 張）；合法牌型為 Group（3–4 張同數字不同色）與 Run（3 張以上同色連號）；首次出牌新放牌總分需 ≥30；電腦對手 1–3 位。AI 為基礎策略——不會重排牌桌、手中百搭牌不會主動使用。

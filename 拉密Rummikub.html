@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>拉密 Rummikub 單機版</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1e5e1e">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
 <style>
 :root {
   --tile-w: 52px; --tile-h: 68px; --fs: 18px;
@@ -334,6 +337,7 @@ body{
   </div>
   <hr style="border-color:#3a3a3a;margin:10px 0;">
   <button class="hbtn r" style="width:100%;justify-content:center;" onclick="newGame()">🔄 重新開始</button>
+  <button class="hbtn" id="installBtn" style="width:100%;justify-content:center;">📲 加入主畫面</button>
   <hr style="border-color:#3a3a3a;margin:10px 0;">
   <div style="font-size:.72em;color:#888;line-height:1.6;text-align:center;">
     ⚠ 本工具僅供個人娛樂與教學示範使用，禁止未經授權公開發布、販售或商業化使用。<br>
@@ -1079,6 +1083,40 @@ document.addEventListener('click', e=>{
   render(loadCache());
   fetchMarquee();
   setInterval(fetchMarquee, REFRESH_MS);
+})();
+
+/* PWA 加入主畫面 — 獨立運作，跟上面遊戲邏輯無關 */
+(function () {
+  'use strict';
+  var deferredPrompt = null;
+  var btn = document.getElementById('installBtn');
+
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();
+    deferredPrompt = e;
+  });
+  window.addEventListener('appinstalled', function () {
+    deferredPrompt = null;
+  });
+
+  if (btn) {
+    var originalLabel = btn.textContent;
+    btn.addEventListener('click', function () {
+      if (!deferredPrompt) {
+        btn.textContent = '瀏覽器不支援，或已安裝過';
+        setTimeout(function () { btn.textContent = originalLabel; }, 2500);
+        return;
+      }
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(function () { deferredPrompt = null; });
+    });
+  }
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('service-worker.js').catch(function () {});
+    });
+  }
 })();
 </script>
 </body>

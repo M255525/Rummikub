@@ -1,0 +1,16 @@
+{
+  "name": "拉密 Rummikub 單機版",
+  "short_name": "拉密Rummikub",
+  "description": "以中高齡使用者為設計核心的拉密單機桌遊",
+  "start_url": "./拉密Rummikub.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#1e5e1e",
+  "theme_color": "#1e5e1e",
+  "lang": "zh-TW",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

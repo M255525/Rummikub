@@ -19,6 +19,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 比照工作區 `expense-tracker-pwa` 的做法：`manifest.json`＋`icons/`（棋盤綠 `#1e5e1e` 背景、金色 `#FFD700`「拉」字圖示）＋`service-worker.js`（network-first＋同源快取備援，不需要每次改動升版 `CACHE_NAME`）。**manifest／SW 只掛在遊戲本體 `拉密Rummikub.html`，不動 `index.html`（純轉址 stub，不需要）與 `拉密Rummikub-GoogleSites嵌入用.html`（貼進 Google Sites 的內嵌內容，不是獨立頁面載入，無法安裝也不該註冊 SW）**。安裝按鈕（`#installBtn`，📲 加入主畫面）放在 `#settings` 面板內、「🔄 重新開始」下方，沿用既有 `.hbtn` 樣式。已用 Playwright 實測 Chromium 觸發 `beforeinstallprompt`、SW 註冊成功。
 
+
+**iOS／iPadOS／macOS 相容性補強（2026-08-14 同日追加）**：Safari（含 iOS 上的 Chrome/Firefox，底層都是 WebKit）**永遠不會觸發 `beforeinstallprompt`**，原本的按鈕邏輯在這些瀏覽器上一律落入「瀏覽器不支援」這句話，其實是誤導——蘋果裝置本來就能加入主畫面，只是要透過分享選單手動操作，不像 Chrome/Edge 有自動彈窗。修法：安裝腳本新增 `isIOSDevice`（`/iPad|iPhone|iPod/` 或 `navigator.platform==='MacIntel' && maxTouchPoints>1`——後者是因為 iPadOS 13+ 預設偽裝成 Mac 桌面版 UA，要用觸控點數才分得出來是 iPad 還是真的 Mac）與 `isMacDesktop && isSafariEngine`（macOS 桌面版 Safari 17+ 是「檔案→加入 Dock」，跟手機的分享選單操作不同）兩種判斷，各自顯示對應的操作指引文字，不再顯示「不支援」；`isStandalone`（`matchMedia('(display-mode: standalone)')` 或 iOS 專有的 `navigator.standalone`）為真時直接隱藏按鈕（已經是安裝後開啟，不需要再顯示安裝按鈕）。`<head>` 同步補上 `apple-touch-icon`（180×180 專用尺寸，`icons/apple-touch-icon.png`，純色不透明背景）＋ `apple-mobile-web-app-capable`／`mobile-web-app-capable`（兩個都要，前者給 Safari、後者是 Chrome 主張的新標準，只寫一個 Chrome 會在主控台噴 deprecation warning）＋ `apple-mobile-web-app-status-bar-style`／`apple-mobile-web-app-title`。這五個判斷/訊息字串在全部 9 個已加裝 PWA 的專案裡是逐字複製的同一段邏輯，日後若要調整任一處的措辭或判斷式，建議九個一起改，避免各專案的安裝體驗不一致。
+
 ## 內建的遊戲規則（改動需一致）
 
 牌組 106 張（紅／藍／橘／黑 四色 ×1–13 各兩組 = 104，＋百搭牌 2 張）；合法牌型為 Group（3–4 張同數字不同色）與 Run（3 張以上同色連號）；首次出牌新放牌總分需 ≥30；電腦對手 1–3 位。AI 為基礎策略——不會重排牌桌、手中百搭牌不會主動使用。

@@ -65,3 +65,7 @@ with io.open('拉密Rummikub.html', encoding='utf-8', newline='') as f:
 **只有玩家獲勝才會計入排行榜**——電腦獲勝或牌堆摸完平局時，`showOverlay()` 第三個參數 `isWin` 是 `falsy`，不會顯示暱稱輸入框，但排行榜列表仍然照樣顯示（單純不能新增）。玩家獲勝時才判斷 `G.playerTurns` 是否擠得進前 5（`lbQualifies()`：不到 5 筆或回合數少於目前第 5 名），擠得進才顯示暱稱輸入框（留白預設「訪客」），按「🏆 記錄成績」才寫入並依回合數重新排序（由小到大）、截斷到 5 筆。UI 直接整合進既有的結算 `#overlay` Modal 內（`<p id="mbody">` 跟按鈕列之間），不是另開一個畫面。
 
 **`拉密Rummikub-GoogleSites嵌入用.html` 已同步套用**（跟手機版面修正那次一樣，用同一套 Python 腳本重新產生，記得換算當時檔案的 `</head>`/`<body>`/`</body>`/`</html>` 行號）。
+
+## 頂部跑馬燈更新（2026-08-20，`Code.gs` 未改動、不需重新部署）
+
+`render()` 新增 `lastKey`（`JSON.stringify(items)`）比對，內容沒變就不重繪，CSS animation 不再被重置歸零重跑（`bar.classList.add('on')` 維持不變）；新增 `appendParsedText()`／`buildTrackContent()` 支援 `[文字](https://...)` 連結語法（`createTextNode` 組 DOM，避免 XSS），資料格式仍是純字串陣列，向下相容。已同步重新產生 `拉密Rummikub-GoogleSites嵌入用.html`，並 commit＋push（GitHub Pages 自動重新部署；Google Sites 嵌入版需使用者自行重新貼上更新後的嵌入碼）。

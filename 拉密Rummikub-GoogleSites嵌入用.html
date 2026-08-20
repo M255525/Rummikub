@@ -1,3 +1,4 @@
+<meta charset="UTF-8">
 <style>
 :root {
   --tile-w: 52px; --tile-h: 68px; --fs: 18px;
@@ -326,6 +327,7 @@ body{
   </div>
   <hr style="border-color:#3a3a3a;margin:10px 0;">
   <button class="hbtn r" style="width:100%;justify-content:center;" onclick="newGame()">🔄 重新開始</button>
+  <button class="hbtn" id="installBtn" style="width:100%;justify-content:center;">📲 加入主畫面</button>
   <hr style="border-color:#3a3a3a;margin:10px 0;">
   <div style="font-size:.72em;color:#888;line-height:1.6;text-align:center;">
     ⚠ 本工具僅供個人娛樂與教學示範使用，禁止未經授權公開發布、販售或商業化使用。<br>
@@ -1041,6 +1043,7 @@ document.addEventListener('click', e=>{
 
   var bar = document.getElementById('marqueeBar');
   var track = document.getElementById('marqueeTrack');
+  var lastKey = null;
 
   function loadCache() {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch (e) { return []; }
@@ -1048,10 +1051,44 @@ document.addEventListener('click', e=>{
   function saveCache(items) {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); } catch (e) {}
   }
+  // 把「[文字](https://...)」語法轉成可點擊連結，其餘文字維持純文字（用 createTextNode 避免 XSS）
+  function appendParsedText(container, text) {
+    var re = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
+    var lastIndex = 0, m;
+    while ((m = re.exec(text))) {
+      if (m.index > lastIndex) container.appendChild(document.createTextNode(text.slice(lastIndex, m.index)));
+      var a = document.createElement('a');
+      a.href = m[2];
+      a.textContent = m[1];
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.style.color = 'inherit';
+      a.style.textDecoration = 'underline';
+      container.appendChild(a);
+      lastIndex = re.lastIndex;
+    }
+    if (lastIndex < text.length) container.appendChild(document.createTextNode(text.slice(lastIndex)));
+  }
+  function buildTrackContent(items) {
+    var frag = document.createDocumentFragment();
+    function appendPass() {
+      items.forEach(function (item, idx) {
+        if (idx > 0) frag.appendChild(document.createTextNode('　★　'));
+        appendParsedText(frag, item);
+      });
+    }
+    appendPass();
+    frag.appendChild(document.createTextNode('　★　'));
+    appendPass();
+    return frag;
+  }
   function render(items) {
     if (!items || !items.length) return;
-    var joined = items.join('　★　');
-    track.textContent = joined + '　★　' + joined;
+    var key = JSON.stringify(items);
+    if (key === lastKey) return;   // 內容沒變就不重繪，避免 CSS animation 被重置而歸零重跑
+    lastKey = key;
+    track.innerHTML = '';
+    track.appendChild(buildTrackContent(items));
     bar.classList.add('on');
     var width = track.scrollWidth / 2;
     track.style.animationDuration = Math.max(width / 80, 10) + 's';
@@ -1071,5 +1108,57 @@ document.addEventListener('click', e=>{
   render(loadCache());
   fetchMarquee();
   setInterval(fetchMarquee, REFRESH_MS);
+})();
+
+/* PWA 加入主畫面 — 獨立運作，跟上面遊戲邏輯無關 */
+(function () {
+  'use strict';
+  var deferredPrompt = null;
+  var btn = document.getElementById('installBtn');
+
+  var ua = navigator.userAgent || '';
+  var isIOSDevice = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var isMacDesktop = /Macintosh/.test(ua) && !isIOSDevice;
+  var isSafariEngine = /^((?!chrome|crios|fxios|edgios|android).)*safari/i.test(ua);
+  var isStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+
+  function fallbackMessage() {
+    if (isIOSDevice) return '請點畫面上的「分享」圖示，選「加入主畫面」';
+    if (isMacDesktop && isSafariEngine) return '請用選單列「檔案」→「加入 Dock」（Safari 17 以上）';
+    return '瀏覽器不支援，或已安裝過';
+  }
+
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();
+    deferredPrompt = e;
+  });
+  window.addEventListener('appinstalled', function () {
+    deferredPrompt = null;
+  });
+
+  if (btn) {
+    if (isStandalone) {
+      btn.style.display = 'none';
+    } else {
+      btn.addEventListener('click', function () {
+        if (!deferredPrompt) {
+          window.alert(fallbackMessage());
+          return;
+        }
+        try {
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then(function () { deferredPrompt = null; });
+        } catch (err) {
+          window.alert(fallbackMessage());
+        }
+      });
+    }
+  }
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('service-worker.js').catch(function () {});
+    });
+  }
 })();
 </script>

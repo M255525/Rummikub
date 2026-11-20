@@ -69,3 +69,6 @@ with io.open('拉密Rummikub.html', encoding='utf-8', newline='') as f:
 ## 頂部跑馬燈更新（2026-08-20，`Code.gs` 未改動、不需重新部署）
 
 `render()` 新增 `lastKey`（`JSON.stringify(items)`）比對，內容沒變就不重繪，CSS animation 不再被重置歸零重跑（`bar.classList.add('on')` 維持不變）；新增 `appendParsedText()`／`buildTrackContent()` 支援 `[文字](https://...)` 連結語法（`createTextNode` 組 DOM，避免 XSS），資料格式仍是純字串陣列，向下相容。已同步重新產生 `拉密Rummikub-GoogleSites嵌入用.html`，並 commit＋push（GitHub Pages 自動重新部署；Google Sites 嵌入版需使用者自行重新貼上更新後的嵌入碼）。
+
+## 操作手冊（2026-11-20 補上）
+`manual.html`：玩法、操作、排行榜、加入主畫面、常見狀況、完整創作者區塊（證照 7 筆、經歷 18 筆）、手冊訪客計數器 `page_id=m255525.<id>.manual`。入口在遊戲頁尾創作者那一行「📖 操作手冊」；已加進 `service-worker.js` 的 `SHELL_FILES` 並升 `CACHE_NAME`。使用警語入口在訪客計數器旁、首次造訪跳出一次（localStorage `mkw.<repo>.seen`）。

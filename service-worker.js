@@ -1,9 +1,10 @@
 // 僅供「加入主畫面」安裝需求使用：network-first + 同源快取備援。
-const CACHE_NAME = 'rummikub-shell-v3';
+const CACHE_NAME = 'rummikub-shell-v4';
 const SHELL_FILES = [
   './',
   './index.html',
   './拉密Rummikub.html',
+  './manual.html',
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png',

@@ -1,4 +1,16 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>數字牌接龍</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1e5e1e">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="數字牌接龍">
 <style>
 :root {
   --tile-w: 52px; --tile-h: 68px; --fs: 18px;
@@ -236,6 +248,8 @@ body{
   :root{--tile-w:56px;--tile-h:74px;}
 }
 </style>
+</head>
+<body>
 
 <!-- Marquee -->
 <div id="marqueeBar"><div id="marqueeTrack"></div></div>
@@ -266,8 +280,8 @@ body{
 <!-- Tutorial -->
 <div id="tut-overlay">
   <div id="tut">
-    <h2>📖 拉密遊戲教學</h2>
-    <p>拉密（Rummikub）是把手牌組成合法牌型的策略桌遊，最先出完手牌者獲勝。</p>
+    <h2>📖 數字牌接龍教學</h2>
+    <p>數字牌接龍是把手牌組成合法牌型的策略桌遊，最先出完手牌者獲勝。</p>
 
     <h3>🃏 牌組（共 106 張）</h3>
     <p>4 種顏色 × 數字 1–13 × 各 2 組 = 104 張，加上 2 張百搭牌（☆）</p>
@@ -332,14 +346,15 @@ body{
   <hr style="border-color:#3a3a3a;margin:10px 0;">
   <div style="font-size:.72em;color:#888;line-height:1.6;text-align:center;">
     ⚠ 本工具僅供個人娛樂與教學示範使用，禁止未經授權公開發布、販售或商業化使用。<br>
-    「Rummikub」「拉密」為其權利人之商標，只用來說明玩法類型；本遊戲為自行製作，非官方產品。<br>
-    創作者：蔡豐全（Mark Tsai）
+    本遊戲依常見的「數字牌型組合」玩法自行製作，與任何桌遊品牌或廠商無關。<br>
+    創作者：蔡豐全（Mark Tsai）・<a href="manual.html" style="color:inherit">📖 操作手冊</a><br>
+    <img src="https://visitor-badge.laobi.icu/badge?page_id=m255525.rummikub" alt="訪客次數" style="vertical-align:middle;height:20px;margin-top:6px;">
   </div>
 </div>
 
 <!-- Header -->
 <div id="hdr">
-  <h1>🃏 拉密</h1>
+  <h1>🃏 數字牌接龍</h1>
   <div id="msg">載入中…</div>
   <button class="hbtn n" onclick="document.getElementById('tut-overlay').classList.add('on')">📖 教學</button>
   <button class="hbtn n" onclick="document.getElementById('settings').classList.toggle('on')">⚙ 設定</button>
@@ -1164,3 +1179,56 @@ document.addEventListener('click', e=>{
   }
 })();
 </script>
+
+<!-- 使用警語（2026-11-20 補齊標準配備）：頁面上的入口加在訪客計數器旁，首次造訪自動跳出一次 -->
+<style>
+.mkw-mask{position:fixed;inset:0;background:rgba(15,18,22,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:2147483000}
+.mkw-box{background:#fff;color:#222;max-width:520px;width:100%;max-height:calc(100vh - 32px);overflow:auto;border-radius:12px;padding:20px 22px;box-shadow:0 10px 40px rgba(0,0,0,.3);font:15px/1.7 "Microsoft JhengHei","PingFang TC",system-ui,sans-serif;text-align:left}
+.mkw-box h2{margin:0 0 8px;font-size:1.15rem;color:#b3261e}
+.mkw-box ul{margin:0 0 14px;padding-left:1.2em}
+.mkw-box li{margin:4px 0}
+.mkw-box button{font:inherit;background:#b3261e;color:#fff;border:0;border-radius:8px;padding:8px 18px;cursor:pointer}
+.mkw-link{color:inherit;cursor:pointer;text-decoration:underline}
+.mkw-pill{position:fixed;left:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:2147482000;background:rgba(255,255,255,.92);color:#b3261e;border:1px solid #b3261e;border-radius:999px;padding:3px 10px;font:13px/1.4 "Microsoft JhengHei",system-ui,sans-serif;cursor:pointer}
+@media (prefers-color-scheme:dark){.mkw-box{background:#24272b;color:#eee}.mkw-box h2{color:#ff8a80}}
+</style>
+<script>
+(function(){
+  var C = {"key":"mkw.rummikub.seen","items":["這是依「數字牌型組合」玩法自製的練習遊戲，與任何桌遊品牌或廠商無關。","電腦對手的程度與規則細節可能和實體桌遊或比賽規則不同，請以你們約定的規則為準。","本工具由個人開發、免費提供，僅供學習與參考；使用結果請自行判斷，作者不負任何責任。"],"noPill":false};
+  function open(){
+    if(document.querySelector('.mkw-mask')) return;
+    var m = document.createElement('div'); m.className = 'mkw-mask'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true'); m.setAttribute('aria-label', '使用警語');
+    var b = document.createElement('div'); b.className = 'mkw-box';
+    var h = document.createElement('h2'); h.textContent = '⚠ 使用警語'; b.appendChild(h);
+    var ul = document.createElement('ul'); C.items.forEach(function(t){ var li = document.createElement('li'); li.textContent = t; ul.appendChild(li); }); b.appendChild(ul);
+    var ok = document.createElement('button'); ok.type = 'button'; ok.textContent = '我知道了'; b.appendChild(ok);
+    function close(){ m.remove(); document.removeEventListener('keydown', esc, true); try{ localStorage.setItem(C.key, '1'); }catch(e){} }
+    function esc(e){ if(e.key === 'Escape'){ e.stopPropagation(); close(); } }
+    ok.addEventListener('click', close); m.addEventListener('click', function(e){ if(e.target === m) close(); });
+    document.addEventListener('keydown', esc, true);
+    m.appendChild(b); document.body.appendChild(m); ok.focus();
+  }
+  function link(){ var a = document.createElement('a'); a.href = '#'; a.className = 'mkw-link'; a.textContent = '⚠ 使用警語'; a.addEventListener('click', function(e){ e.preventDefault(); open(); }); return a; }
+  // 入口放在訪客計數器旁邊（計數器是 JS 晚產生的也會補上）
+  function attach(){
+    var imgs = document.querySelectorAll('img[src*="visitor-badge"], img[src*="hits.sh"], img[src*="countapi"]'), n = 0;
+    Array.prototype.forEach.call(imgs, function(img){
+      var host = img.closest('a') || img;
+      if(host.previousSibling && host.previousSibling.className === 'mkw-sep') { n++; return; }
+      var s = document.createElement('span'); s.className = 'mkw-sep'; s.appendChild(link()); s.appendChild(document.createTextNode('　'));
+      host.parentNode.insertBefore(s, host); n++;
+    });
+    return n;
+  }
+  function init(){
+    var found = attach();
+    if(!found && !C.noPill){ var p = document.createElement('button'); p.type = 'button'; p.className = 'mkw-pill'; p.textContent = '⚠ 使用警語'; p.addEventListener('click', open); document.body.appendChild(p); }
+    var tm = null; if(window.MutationObserver) new MutationObserver(function(){ if(tm) return; tm = setTimeout(function(){ tm = null; attach(); }, 400); }).observe(document.body, {childList: true, subtree: true});
+    var seen = false; try{ seen = localStorage.getItem(C.key) === '1'; }catch(e){ seen = true; }
+    if(!seen) setTimeout(open, 600);
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+</script>
+</body>
+</html>

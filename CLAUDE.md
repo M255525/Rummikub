@@ -2,22 +2,24 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-以中高齡使用者為設計核心的拉密（Rummikub）單機桌遊。純前端、單一檔案、無外部相依、無伺服器，開啟即玩。
+以中高齡使用者為設計核心的「數字牌接龍」單機桌遊。純前端、單一檔案、無外部相依、無伺服器，開啟即玩。
+
+**2026-11-25 改名（商標考量，使用者同意）**：遊戲名稱、檔名、圖示、GitHub repo 與本機資料夾全部改成「數字牌接龍」／`number-tile-game`。**頁面、檔名、說明都不可再出現原本那個桌遊品牌的中英文名稱**（歷史紀錄見 git log）。舊 GitHub Pages 網址已失效（Pages 不轉址）；Google Sites 嵌入版要使用者重新貼上。訪客計數器 `page_id`、localStorage key（`rmk-*`、`mkw.*.seen`）**刻意不改**，畫面上看不到。service worker 會順便清掉舊快取。
 
 ## 架構
 
-- **`拉密Rummikub.html`** — 遊戲本體。**所有 HTML／CSS／JavaScript 與遊戲邏輯都在這一個檔案內**，沒有建置步驟、沒有套件、沒有測試。直接以瀏覽器開啟即可執行；修改後重新整理瀏覽器即生效。
-- **`拉密Rummikub-GoogleSites嵌入用.html`** — 供 Google Sites 內嵌的變體版本。
+- **`數字牌接龍.html`** — 遊戲本體。**所有 HTML／CSS／JavaScript 與遊戲邏輯都在這一個檔案內**，沒有建置步驟、沒有套件、沒有測試。直接以瀏覽器開啟即可執行；修改後重新整理瀏覽器即生效。
+- **`數字牌接龍-GoogleSites嵌入用.html`** — 供 Google Sites 內嵌的變體版本。
 - **`一鍵複製-貼到GoogleSites.bat`** — 把嵌入版 HTML 內容複製到剪貼簿，方便貼進 Google Sites。
-- **`index.html`** — GitHub Pages 用的重新導向 stub（`meta refresh` 導到 `拉密Rummikub.html`），不是遊戲本體，內容不需要跟著遊戲邏輯同步更新。
+- **`index.html`** — GitHub Pages 用的重新導向 stub（`meta refresh` 導到 `數字牌接龍.html`），不是遊戲本體，內容不需要跟著遊戲邏輯同步更新。
 
 **兩個 HTML 版本需保持同步**：修改遊戲邏輯或介面時，主檔與 Google Sites 嵌入版都要一起更新（或由主檔重新產生嵌入版），否則兩處行為會分歧。
 
-**GitHub Pages 上線網址**：<https://m255525.github.io/Rummikub/>（2026-08-05 啟用，`master` 分支根目錄）。公開 repo：<https://github.com/M255525/Rummikub>。因為遊戲本體檔名是中文（`拉密Rummikub.html`），GitHub Pages 預設只認 `index.html` 當首頁，所以另外放了一個極簡的 `index.html` 導向頁，避免把遊戲內容複製成兩份要同步。**這個上線管道跟 Google Sites 是分開的兩條路**：`git push` 到這個 repo 後 GitHub Pages 會自動重新部署（通常一兩分鐘內生效）；Google Sites 版本仍然要手動雙擊 `一鍵複製-貼到GoogleSites.bat` 重新貼上發布，兩邊不會互相同步，改完程式碼要記得兩邊都處理。
+**GitHub Pages 上線網址**：<https://m255525.github.io/number-tile-game/>（2026-08-05 啟用，`master` 分支根目錄）。公開 repo：<https://github.com/M255525/number-tile-game>。因為遊戲本體檔名是中文（`數字牌接龍.html`），GitHub Pages 預設只認 `index.html` 當首頁，所以另外放了一個極簡的 `index.html` 導向頁，避免把遊戲內容複製成兩份要同步。**這個上線管道跟 Google Sites 是分開的兩條路**：`git push` 到這個 repo 後 GitHub Pages 會自動重新部署（通常一兩分鐘內生效）；Google Sites 版本仍然要手動雙擊 `一鍵複製-貼到GoogleSites.bat` 重新貼上發布，兩邊不會互相同步，改完程式碼要記得兩邊都處理。
 
 ## 加入主畫面（PWA，2026-08-14 新增）
 
-比照工作區 `expense-tracker-pwa` 的做法：`manifest.json`＋`icons/`（棋盤綠 `#1e5e1e` 背景、金色 `#FFD700`「拉」字圖示）＋`service-worker.js`（network-first＋同源快取備援，不需要每次改動升版 `CACHE_NAME`）。**manifest／SW 只掛在遊戲本體 `拉密Rummikub.html`，不動 `index.html`（純轉址 stub，不需要）與 `拉密Rummikub-GoogleSites嵌入用.html`（貼進 Google Sites 的內嵌內容，不是獨立頁面載入，無法安裝也不該註冊 SW）**。安裝按鈕（`#installBtn`，📲 加入主畫面）放在 `#settings` 面板內、「🔄 重新開始」下方，沿用既有 `.hbtn` 樣式。已用 Playwright 實測 Chromium 觸發 `beforeinstallprompt`、SW 註冊成功。
+比照工作區 `expense-tracker-pwa` 的做法：`manifest.json`＋`icons/`（棋盤綠 `#1e5e1e` 背景、金色 `#FFD700`「數」字圖示）＋`service-worker.js`（network-first＋同源快取備援，不需要每次改動升版 `CACHE_NAME`）。**manifest／SW 只掛在遊戲本體 `數字牌接龍.html`，不動 `index.html`（純轉址 stub，不需要）與 `數字牌接龍-GoogleSites嵌入用.html`（貼進 Google Sites 的內嵌內容，不是獨立頁面載入，無法安裝也不該註冊 SW）**。安裝按鈕（`#installBtn`，📲 加入主畫面）放在 `#settings` 面板內、「🔄 重新開始」下方，沿用既有 `.hbtn` 樣式。已用 Playwright 實測 Chromium 觸發 `beforeinstallprompt`、SW 註冊成功。
 
 
 **iOS／iPadOS／macOS 相容性補強（2026-08-14 同日追加）**：Safari（含 iOS 上的 Chrome/Firefox，底層都是 WebKit）**永遠不會觸發 `beforeinstallprompt`**，原本的按鈕邏輯在這些瀏覽器上一律落入「瀏覽器不支援」這句話，其實是誤導——蘋果裝置本來就能加入主畫面，只是要透過分享選單手動操作，不像 Chrome/Edge 有自動彈窗。修法：安裝腳本新增 `isIOSDevice`（`/iPad|iPhone|iPod/` 或 `navigator.platform==='MacIntel' && maxTouchPoints>1`——後者是因為 iPadOS 13+ 預設偽裝成 Mac 桌面版 UA，要用觸控點數才分得出來是 iPad 還是真的 Mac）與 `isMacDesktop && isSafariEngine`（macOS 桌面版 Safari 17+ 是「檔案→加入 Dock」，跟手機的分享選單操作不同）兩種判斷，各自顯示對應的操作指引文字，不再顯示「不支援」；`isStandalone`（`matchMedia('(display-mode: standalone)')` 或 iOS 專有的 `navigator.standalone`）為真時直接隱藏按鈕（已經是安裝後開啟，不需要再顯示安裝按鈕）。`<head>` 同步補上 `apple-touch-icon`（180×180 專用尺寸，`icons/apple-touch-icon.png`，純色不透明背景）＋ `apple-mobile-web-app-capable`／`mobile-web-app-capable`（兩個都要，前者給 Safari、後者是 Chrome 主張的新標準，只寫一個 Chrome 會在主控台噴 deprecation warning）＋ `apple-mobile-web-app-status-bar-style`／`apple-mobile-web-app-title`。這五個判斷/訊息字串在全部 9 個已加裝 PWA 的專案裡是逐字複製的同一段邏輯，日後若要調整任一處的措辭或判斷式，建議九個一起改，避免各專案的安裝體驗不一致。
@@ -46,11 +48,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **修法**：在既有 `@media(max-width:600px)` 斷點內，給 `#msg`／`#turn-info` 加 `flex-basis:100%`（`#msg` 另加 `order:5` 讓它排到標題／按鈕後面自成一行），讓它們各自獨占一整行，標題＋按鈕、4 顆操作按鈕則維持在各自單獨一行內（實測寬度足夠容納，不會再被文字擠壓）。效果：header 110px→83px、action bar 179px→88px，牌桌可視高度增加約 120px（390×844 視窗下）。**點選（tap-to-select）出牌流程本來就是用一般 `onclick`，不依賴 HTML5 拖拉事件，觸控裝置上原本就能正常運作**——這次調整純粹是版面壓縮問題，不是互動邏輯問題。已用 Playwright 在 390px／360px 寬度下實測版面與完整選牌→加入新組→確認出牌流程都正常。
 
-**`拉密Rummikub-GoogleSites嵌入用.html` 已同步套用**（兩個檔案本來就要求保持同步，見上方「架構」一節）。這個嵌入版本除了少了 `<!DOCTYPE>`／`<html>`／`<head>`／`<body>` 這幾行包裝標籤之外，內容與主檔逐行相同；之後任何改動都可以用這個做法重新產生嵌入版，不需要手動逐一對照：
+**`數字牌接龍-GoogleSites嵌入用.html` 已同步套用**（兩個檔案本來就要求保持同步，見上方「架構」一節）。這個嵌入版本除了少了 `<!DOCTYPE>`／`<html>`／`<head>`／`<body>` 這幾行包裝標籤之外，內容與主檔逐行相同；之後任何改動都可以用這個做法重新產生嵌入版，不需要手動逐一對照：
 
 ```python
 import io
-with io.open('拉密Rummikub.html', encoding='utf-8', newline='') as f:
+with io.open('數字牌接龍.html', encoding='utf-8', newline='') as f:
     lines = f.readlines()
 # 移除 DOCTYPE/html/head/title 開頭六行、</head>+<body> 兩行、</body>+</html> 結尾兩行
 # （實際行號請對照當下檔案的 </head>/<body>/</body>/</html> 位置）
@@ -64,11 +66,11 @@ with io.open('拉密Rummikub.html', encoding='utf-8', newline='') as f:
 
 **只有玩家獲勝才會計入排行榜**——電腦獲勝或牌堆摸完平局時，`showOverlay()` 第三個參數 `isWin` 是 `falsy`，不會顯示暱稱輸入框，但排行榜列表仍然照樣顯示（單純不能新增）。玩家獲勝時才判斷 `G.playerTurns` 是否擠得進前 5（`lbQualifies()`：不到 5 筆或回合數少於目前第 5 名），擠得進才顯示暱稱輸入框（留白預設「訪客」），按「🏆 記錄成績」才寫入並依回合數重新排序（由小到大）、截斷到 5 筆。UI 直接整合進既有的結算 `#overlay` Modal 內（`<p id="mbody">` 跟按鈕列之間），不是另開一個畫面。
 
-**`拉密Rummikub-GoogleSites嵌入用.html` 已同步套用**（跟手機版面修正那次一樣，用同一套 Python 腳本重新產生，記得換算當時檔案的 `</head>`/`<body>`/`</body>`/`</html>` 行號）。
+**`數字牌接龍-GoogleSites嵌入用.html` 已同步套用**（跟手機版面修正那次一樣，用同一套 Python 腳本重新產生，記得換算當時檔案的 `</head>`/`<body>`/`</body>`/`</html>` 行號）。
 
 ## 頂部跑馬燈更新（2026-08-20，`Code.gs` 未改動、不需重新部署）
 
-`render()` 新增 `lastKey`（`JSON.stringify(items)`）比對，內容沒變就不重繪，CSS animation 不再被重置歸零重跑（`bar.classList.add('on')` 維持不變）；新增 `appendParsedText()`／`buildTrackContent()` 支援 `[文字](https://...)` 連結語法（`createTextNode` 組 DOM，避免 XSS），資料格式仍是純字串陣列，向下相容。已同步重新產生 `拉密Rummikub-GoogleSites嵌入用.html`，並 commit＋push（GitHub Pages 自動重新部署；Google Sites 嵌入版需使用者自行重新貼上更新後的嵌入碼）。
+`render()` 新增 `lastKey`（`JSON.stringify(items)`）比對，內容沒變就不重繪，CSS animation 不再被重置歸零重跑（`bar.classList.add('on')` 維持不變）；新增 `appendParsedText()`／`buildTrackContent()` 支援 `[文字](https://...)` 連結語法（`createTextNode` 組 DOM，避免 XSS），資料格式仍是純字串陣列，向下相容。已同步重新產生 `數字牌接龍-GoogleSites嵌入用.html`，並 commit＋push（GitHub Pages 自動重新部署；Google Sites 嵌入版需使用者自行重新貼上更新後的嵌入碼）。
 
 ## 操作手冊（2026-11-20 補上）
 `manual.html`：玩法、操作、排行榜、加入主畫面、常見狀況、完整創作者區塊（證照 7 筆、經歷 18 筆）、手冊訪客計數器 `page_id=m255525.<id>.manual`。入口在遊戲頁尾創作者那一行「📖 操作手冊」；已加進 `service-worker.js` 的 `SHELL_FILES` 並升 `CACHE_NAME`。使用警語入口在訪客計數器旁、首次造訪跳出一次（localStorage `mkw.<repo>.seen`）。

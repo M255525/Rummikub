@@ -1,9 +1,9 @@
 // 僅供「加入主畫面」安裝需求使用：network-first + 同源快取備援。
-const CACHE_NAME = 'rummikub-shell-v4';
+const CACHE_NAME = 'number-tile-game-shell-v1';
 const SHELL_FILES = [
   './',
   './index.html',
-  './拉密Rummikub.html',
+  './數字牌接龍.html',
   './manual.html',
   './manifest.json',
   './icons/icon-192.png',
@@ -21,7 +21,7 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE_NAME && k.indexOf(CACHE_NAME.replace(/\d+$/, '')) === 0).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE_NAME && (k.indexOf(CACHE_NAME.replace(/\d+$/, '')) === 0 || k.indexOf('rummikub-shell-') === 0)).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });

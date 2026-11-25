@@ -1,16 +1,16 @@
 ---
-name: edit-rummikub
-description: 修改 Rummikub 拉密單機桌遊。當使用者在 Rummikub 專案要求調整遊戲玩法、AI 對手、介面或版面時使用。維持「中高齡友善」設計約束，並確保主檔與 Google Sites 嵌入版兩個 HTML 保持同步。
+name: edit-number-tile-game
+description: 修改數字牌接龍單機桌遊。當使用者在 number-tile-game 專案要求調整遊戲玩法、AI 對手、介面或版面時使用。維持「中高齡友善」設計約束，並確保主檔與 Google Sites 嵌入版兩個 HTML 保持同步。
 ---
 
-# 修改 Rummikub 拉密桌遊
+# 修改數字牌接龍
 
 單一檔案 vanilla HTML/CSS/JS，無相依、無建置、無測試。修改後以瀏覽器開啟驗證即可。
 
 ## 兩個版本必須同步
 
-- `拉密Rummikub.html` — 遊戲本體。
-- `拉密Rummikub-GoogleSites嵌入用.html` — Google Sites 嵌入變體。
+- `數字牌接龍.html` — 遊戲本體。
+- `數字牌接龍-GoogleSites嵌入用.html` — Google Sites 嵌入變體。
 
 改動玩法或介面時，**兩檔都要一起更新**（或由主檔重新產生嵌入版）。`一鍵複製-貼到GoogleSites.bat` 可把嵌入版內容複製到剪貼簿供貼上 Google Sites。
 

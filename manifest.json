@@ -1,8 +1,8 @@
 {
-  "name": "拉密 Rummikub 單機版",
-  "short_name": "拉密Rummikub",
-  "description": "以中高齡使用者為設計核心的拉密單機桌遊",
-  "start_url": "./拉密Rummikub.html",
+  "name": "數字牌接龍",
+  "short_name": "數字牌接龍",
+  "description": "以中高齡使用者為設計核心的數字牌單機桌遊",
+  "start_url": "./數字牌接龍.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#1e5e1e",
